@@ -35,7 +35,7 @@ const add = async (req, res) => {
   try {
     const requiredFields = ["goal_description", "start_date", "end_date"];
 
-    //if goal fields are empty return error
+    // if goal fields are empty return error
     for (const field of requiredFields) {
       if (!req.body[field]) {
         return res.status(400).json({
@@ -69,8 +69,31 @@ const add = async (req, res) => {
   }
 };
 
+// delete warehouse 
+const remove = async (req, res) => {
+  try {
+    const rowsDeleted = await knex("goals")
+      .where({ id: req.params.id })
+      .delete();
+
+    if (rowsDeleted === 0) {
+      return res
+        .status(404)
+        .json({ message: `Goals with ID ${req.params.id} not found` });
+    }
+
+    // No Content response
+    res.sendStatus(204);
+  } catch (error) {
+    res.status(500).json({
+      message: `Unable to delete goal: ${error}`,
+    });
+  }
+};
+
 module.exports = {
   list,
   findOne,
   add,
+  remove,
 };
