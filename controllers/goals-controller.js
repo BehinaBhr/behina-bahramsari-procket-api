@@ -97,7 +97,7 @@ const update = async (req, res) => {
   try {
     const requiredFields = ["goal_description", "start_date", "end_date"];
 
-    //confirm fields are not empty
+    // confirm fields are not empty
     for (const field of requiredFields) {
       if (!req.body[field]) {
         return res.status(400).json({
