@@ -30,7 +30,47 @@ const findOne = async (req, res) => {
   }
 };
 
+// add a new goal 
+const add = async (req, res) => {
+  try {
+    const requiredFields = ["goal_description", "start_date", "end_date"];
+
+    //if goal fields are empty return error
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({
+          message: `invalid input: ${field} was null or empty`,
+        });
+      }
+    }
+
+    // Check if goal with the same description already exists
+    const existingGoal = await knex("goals")
+      .where({ goal_description: req.body.goal_description })
+      .first();
+    if (existingGoal) {
+      return res.status(409).json({
+        message: "Goal with the same description already exists",
+      });
+    }
+    
+    const result = await knex("goals").insert(req.body);
+    const newGoalId = result[0];
+    const createdGoal = await knex("goals")
+      .where({ id: newGoalId })
+      .select(goalAttr)
+      .first();
+
+    res.status(201).json(createdGoal);
+  } catch (error) {
+    res.status(500).json({
+      message: `Unable to create new goal: ${error}`,
+    });
+  }
+};
+
 module.exports = {
   list,
   findOne,
+  add,
 };
