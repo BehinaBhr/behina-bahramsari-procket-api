@@ -22,7 +22,7 @@ const findOne = async (req, res) => {
       .select(goalAttr)
       .first();
     if (!goal) {
-      return res.status(404).json({ error: "Goal not found" });
+      return res.status(404).json({ error: `Goal with ID ${req.params.id} not found` });
     }
     res.status(200).json(goal);
   } catch (err) {
@@ -91,9 +91,50 @@ const remove = async (req, res) => {
   }
 };
 
+//update a goal with new input data
+const update = async (req, res) => {
+  try {
+    const requiredFields = ["goal_description", "start_date", "end_date"];
+
+    //confirm fields are not empty
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({
+          message: `invalid input: ${field} was null or empty`,
+        });
+      }
+    }
+
+    const rowsUpdated = await knex("goals")
+      .where({ id: req.params.id })
+      .update(req.body);
+
+    if (rowsUpdated === 0) {
+      return res.status(404).json({
+        message: `Goal with ID ${req.params.id} not found`,
+      });
+    }
+
+    const updatedGoal = await knex("goals")
+      .where({
+        id: req.params.id,
+      })
+      .select(goalAttr)
+      .first();
+
+    res.json(updatedGoal);
+  } catch (error) {
+    res.status(500).json({
+      message: `Unable to update goal with ID ${req.params.id}: ${error}`,
+    });
+  }
+};
+
+
 module.exports = {
   list,
   findOne,
   add,
   remove,
+  update,
 };
