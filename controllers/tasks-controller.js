@@ -99,8 +99,27 @@ const add = async (req, res) => {
   }
 };
 
+// delete an task
+const remove = async (req, res) => {
+  try {
+    const deletedRow = await knex("tasks")
+      .where({ id: req.params.id })
+      .delete();
+    if (deletedRow === 0) {
+
+      // Checking if the task exists
+      return res.status(404).json({ message: `Task with ID ${req.params.id} not found` });
+    }
+    // No Content response
+    res.sendStatus(204);
+  } catch (error) {
+    res.sratus(500).json({ message: `Unable to delete task with ID ${req.params.id}` });
+  }
+};
+
 module.exports = {
   list,
   findOne,
   add,
+  remove
 };
