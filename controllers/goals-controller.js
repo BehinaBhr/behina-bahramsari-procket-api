@@ -6,8 +6,7 @@ const goalAttr = ["id", "goal_description", "start_date", "end_date"];
 // get list of goals
 const list = async (_req, res) => {
   try {
-    const data = await knex("goals")
-    .select(goalAttr);
+    const data = await knex("goals").select(goalAttr);
     res.status(200).json(data);
   } catch (err) {
     res.status(400).send(`Error retrieving goals: ${err}`);
@@ -22,7 +21,9 @@ const findOne = async (req, res) => {
       .select(goalAttr)
       .first();
     if (!goal) {
-      return res.status(404).json({ error: `Goal with ID ${req.params.id} not found` });
+      return res
+        .status(404)
+        .json({ error: `Goal with ID ${req.params.id} not found` });
     }
     res.status(200).json(goal);
   } catch (err) {
@@ -30,7 +31,7 @@ const findOne = async (req, res) => {
   }
 };
 
-// add a new goal 
+// add a new goal
 const add = async (req, res) => {
   try {
     const requiredFields = ["goal_description", "start_date", "end_date"];
@@ -53,7 +54,7 @@ const add = async (req, res) => {
         message: "Goal with the same description already exists",
       });
     }
-    
+
     const result = await knex("goals").insert(req.body);
     const newGoalId = result[0];
     const createdGoal = await knex("goals")
@@ -69,7 +70,7 @@ const add = async (req, res) => {
   }
 };
 
-// delete warehouse 
+// delete goal
 const remove = async (req, res) => {
   try {
     const rowsDeleted = await knex("goals")
@@ -91,7 +92,7 @@ const remove = async (req, res) => {
   }
 };
 
-//update a goal with new input data
+// update a goal with new input data
 const update = async (req, res) => {
   try {
     const requiredFields = ["goal_description", "start_date", "end_date"];
@@ -130,6 +131,43 @@ const update = async (req, res) => {
   }
 };
 
+// tasks for a given goal
+const tasks = async (req, res) => {
+  try {
+    // Check if the goal ID exists
+    const goal = await knex("goals")
+      .where({ id: req.params.id })
+      .select(goalAttr)
+      .first();
+
+    // If goal doesn't exist, return 404 response
+    if (!goal) {
+      return res
+        .status(404)
+        .json({ message: `goal with ID: ${req.params.id} not found` });
+    }
+
+    // If goal exists, proceed to fetch tasks
+    const tasks = await knex("goals")
+      .join("tasks", "tasks.goal_id", "goals.id")
+      .where({ goal_id: req.params.id })
+      .select(
+        "tasks.id",
+        "tasks.goal_id",
+        "goals.goal_description",
+        "tasks.description",
+        "tasks.procrastination_reason",
+        "tasks.completion_status",
+        "tasks.due_date"
+      );
+
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({
+      message: `Unable to retrieve tasks for goal with ID ${req.params.id}: ${error}`,
+    });
+  }
+};
 
 module.exports = {
   list,
@@ -137,4 +175,5 @@ module.exports = {
   add,
   remove,
   update,
+  tasks,
 };
