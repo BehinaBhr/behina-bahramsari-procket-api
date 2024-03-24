@@ -4,7 +4,7 @@ const knex = require("knex")(require("../knexfile"));
 const taskAttr = [
   "tasks.id",
   "tasks.goal_id",
-  "goals.goal_description",
+  "goals.description as goal_description",
   "tasks.description",
   "tasks.procrastination_reason",
   "tasks.is_completed",
@@ -87,8 +87,8 @@ const add = async (req, res) => {
     const dueDate = new Date(req.body.due_date);
     const goalStartDate = goal.start_date;
     const goalEndDate = goal.end_date;
-    const formattedGoalStartDate = goal.start_date.toISOString().split("T")[0];
-    const formattedGoalEndDate = goal.end_date.toISOString().split("T")[0];
+    const formattedGoalStartDate = goalStartDate.toISOString().split("T")[0];
+    const formattedGoalEndDate = goalEndDate.toISOString().split("T")[0];
 
     if (dueDate > goalEndDate || dueDate < goalStartDate) {
       return res.status(400).json({
@@ -133,91 +133,7 @@ const remove = async (req, res) => {
   }
 };
 
-// // update an task with new input data
-// const update = async (req, res) => {
-//   try {
-//     const requiredFields = [
-//       "description",
-//       "procrastination_reason",
-//       "is_completed",
-//       "due_date",
-//     ];
-
-//     // Confirm fields of request body are not empty
-//     // for (const field of requiredFields) {
-//     //   if (!req.body[field]) {
-//     //     return res.status(400).json({
-//     //       message: `Invalid input: ${field} was null or empty`,
-//     //     });
-//     //   }
-//     // }
-
-//     // Confirm fields of request body are not empty
-//     for (const field of requiredFields) {
-//       // Exclude 'procrastination_reason' from required fields check
-//       if (
-//         field !== "procrastination_reason" &&
-//         (req.body[field] === undefined || req.body[field] === null)
-//       ) {
-//         return res.status(400).json({
-//           message: `Invalid input: ${field} was null or empty`,
-//         });
-//       }
-//     }
-
-//     // Check if 'is_completed' is present and a valid boolean value
-//     if ("is_completed" in req.body && ![0, 1].includes(req.body.is_completed)) {
-//       return res.status(400).json({
-//         message: `Invalid input: is_completed must be either 0 or 1`,
-//       });
-//     }
-
-//     // Updating the task item in the database and checking if the task with the specified ID exists
-//     const rowsUpdated = await knex("tasks")
-//       .where({ id: req.params.id })
-//       .update(req.body);
-
-//     if (rowsUpdated === 0) {
-//       return res.status(404).json({
-//         message: `Task with ID ${req.params.id} not found`,
-//       });
-//     }
-//     // Check if task for this goal already exists
-//     const existingTask = await knex("tasks")
-//       .where({ goal_id: req.body.goal_id })
-//       .whereNot({ id: req.params.id }) // Exclude the current task being updated
-//       .first();
-//     if (!existingTask) {
-//       return res.status(404).json({
-//         message: "Task associated with this goal not found",
-//       });
-//     }
-
-//     // Check if the task's due date is after the goal's end date or before the start date
-//     const dueDate = new Date(req.body.due_date);
-//     const goalStartDate = goal.start_date;
-//     const goalEndDate = goal.end_date;
-//     const formattedGoalStartDate = goal.start_date.toISOString().split("T")[0];
-//     const formattedGoalEndDate = goal.end_date.toISOString().split("T")[0];
-
-//     if (dueDate > goalEndDate || dueDate < goalStartDate) {
-//       return res.status(400).json({
-//         message: `Task due date must be between the goal's start date ${formattedGoalStartDate} and end date ${formattedGoalEndDate}`,
-//       });
-//     }
-
-//     // Retrieving the updated task item from the database
-//     const updatedTask = await knex("tasks")
-//       .where({ id: req.params.id })
-//       .select(taskAttr)
-//       .first();
-//     res.status(200).json(updatedTask);
-//   } catch (error) {
-//     res.status(500).json({
-//       message: `Unable to update task with ID ${req.params.id}: ${error}`,
-//     });
-//   }
-// };
+// update an task with new input data
 const update = async (req, res) => {
   try {
     const requiredFields = ["description", "due_date"];

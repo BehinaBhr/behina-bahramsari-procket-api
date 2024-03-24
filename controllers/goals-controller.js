@@ -1,7 +1,7 @@
 const knex = require("knex")(require("../knexfile"));
 
 // fields to select for goals
-const goalAttr = ["id", "goal_description", "start_date", "end_date"];
+const goalAttr = ["id", "description", "start_date", "end_date"];
 
 // get list of goals
 const list = async (_req, res) => {
@@ -34,7 +34,7 @@ const findOne = async (req, res) => {
 // add a new goal
 const add = async (req, res) => {
   try {
-    const requiredFields = ["goal_description", "start_date", "end_date"];
+    const requiredFields = ["description", "start_date", "end_date"];
 
     // if goal fields are empty return error
     for (const field of requiredFields) {
@@ -47,7 +47,7 @@ const add = async (req, res) => {
 
     // Check if goal with the same description already exists
     const existingGoal = await knex("goals")
-      .where({ goal_description: req.body.goal_description })
+      .where({ description: req.body.description })
       .first();
     if (existingGoal) {
       return res.status(409).json({
@@ -95,7 +95,7 @@ const remove = async (req, res) => {
 // update a goal with new input data
 const update = async (req, res) => {
   try {
-    const requiredFields = ["goal_description", "start_date", "end_date"];
+    const requiredFields = ["description", "start_date", "end_date"];
 
     // confirm fields are not empty
     for (const field of requiredFields) {
@@ -154,7 +154,7 @@ const tasks = async (req, res) => {
       .select(
         "tasks.id",
         "tasks.goal_id",
-        "goals.goal_description",
+        "goals.description",
         "tasks.description",
         "tasks.procrastination_reason",
         "tasks.is_completed",
