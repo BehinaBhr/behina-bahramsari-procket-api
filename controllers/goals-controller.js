@@ -156,7 +156,6 @@ const tasks = async (req, res) => {
         "tasks.goal_id",
         "goals.description",
         "tasks.description",
-        "tasks.procrastination_reason",
         "tasks.is_completed",
         "tasks.due_date"
       );
