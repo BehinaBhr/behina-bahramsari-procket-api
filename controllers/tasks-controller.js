@@ -6,7 +6,6 @@ const taskAttr = [
   "tasks.goal_id",
   "goals.description as goal_description",
   "tasks.description",
-  "tasks.procrastination_reason",
   "tasks.is_completed",
   "tasks.due_date",
 ];
@@ -136,34 +135,17 @@ const remove = async (req, res) => {
 // update an task with new input data
 const update = async (req, res) => {
   try {
-    const requiredFields = ["description", "due_date"];
-    const optionalFields = ["procrastination_reason", "is_completed"];
+    const requiredFields = ["description", "is_completed", "due_date"];
 
     // Validate required fields
     for (const field of requiredFields) {
-      if (!req.body[field]) {
+      if (req.body[field] === null) {
         return res.status(400).json({
-          message: `Invalid input: ${field} was null or empty`,
+          message: `Invalid input: ${field} was null or empty ${req.body.is_completed} `,
         });
       }
     }
 
-    // Validate optional fields
-    for (const field of optionalFields) {
-      if (req.body[field] !== undefined && req.body[field] === null) {
-        return res.status(400).json({
-          message: `Invalid input: ${field} cannot be null`,
-        });
-      }
-    }
-
-    // Check if 'is_completed' is present and a valid boolean value
-    if ("is_completed" in req.body && ![0, 1].includes(req.body.is_completed)) {
-      return res.status(400).json({
-        message: `Invalid input: is_completed must be either 0 or 1`,
-      });
-    }
-    
     // Retrieve the task and its associated goal
     const task = await knex("tasks").where({ id: req.params.id }).first();
     if (!task) {
@@ -189,18 +171,11 @@ const update = async (req, res) => {
       });
     }
 
-    // Prepare data for updating the task
-    const updateData = {};
-    [...requiredFields, ...optionalFields].forEach((field) => {
-      if (req.body[field] !== undefined) {
-        updateData[field] = req.body[field];
-      }
-    });
-
     // Update the task in the database
     const rowsUpdated = await knex("tasks")
       .where({ id: req.params.id })
-      .update(updateData);
+      .update(req.body);
+    // .update(updateData);
 
     // Check if the task was updated successfully
     if (rowsUpdated === 0) {
