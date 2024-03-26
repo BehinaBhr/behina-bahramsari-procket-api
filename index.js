@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const goalsRoutes = require("./routes/goals-routes");
 const tasksRoutes = require("./routes/tasks-routes");
-
+const procrastinationsRoutes = require("./routes/procrastinations-routes");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -17,6 +17,9 @@ app.use('/api/goals', goalsRoutes);
 
 // Configuring tasks endpoints
 app.use('/api/tasks', tasksRoutes);
+
+// Configuring tasks endpoints
+app.use('/api/procrastinations', procrastinationsRoutes);
 
 // Define a start routes
 app.get('/', (req, res) => {
