@@ -7,6 +7,12 @@ const goalAttr = ["id", "description", "start_date", "end_date"];
 const list = async (_req, res) => {
   try {
     const data = await knex("goals").select(goalAttr);
+
+    // Calculate progress percentage for each goal
+    for (const goal of data) {
+      await calculateProgress(goal);
+    }
+
     res.status(200).json(data);
   } catch (err) {
     res.status(400).send(`Error retrieving goals: ${err}`);
@@ -16,15 +22,14 @@ const list = async (_req, res) => {
 // get a single goal
 const findOne = async (req, res) => {
   try {
-    const goal = await knex("goals")
-      .where({ id: req.params.id })
-      .select(goalAttr)
-      .first();
+    const goal = await fetchGoal(req.params.id);
+
     if (!goal) {
       return res
         .status(404)
         .json({ error: `Goal with ID ${req.params.id} not found` });
     }
+
     res.status(200).json(goal);
   } catch (err) {
     res.status(500).send(`Error retrieving goals: ${err}`);
@@ -116,12 +121,7 @@ const update = async (req, res) => {
       });
     }
 
-    const updatedGoal = await knex("goals")
-      .where({
-        id: req.params.id,
-      })
-      .select(goalAttr)
-      .first();
+    const updatedGoal = await fetchGoal(req.params.id);
 
     res.json(updatedGoal);
   } catch (error) {
@@ -135,10 +135,7 @@ const update = async (req, res) => {
 const tasks = async (req, res) => {
   try {
     // Check if the goal ID exists
-    const goal = await knex("goals")
-      .where({ id: req.params.id })
-      .select(goalAttr)
-      .first();
+    const goal = await fetchGoal(req.params.id);
 
     // If goal doesn't exist, return 404 response
     if (!goal) {
@@ -156,7 +153,6 @@ const tasks = async (req, res) => {
         "tasks.goal_id",
         "goals.description",
         "tasks.description",
-        "tasks.procrastination_reason",
         "tasks.is_completed",
         "tasks.due_date"
       );
@@ -177,3 +173,23 @@ module.exports = {
   update,
   tasks,
 };
+async function fetchGoal(id) {
+  const goal = await knex("goals").where({ id: id }).select(goalAttr).first();
+  if (goal) {
+    await calculateProgress(goal);
+  }
+  return goal;
+}
+
+async function calculateProgress(goal) {
+  const tasks = await knex("tasks").where({ goal_id: goal.id });
+  const completedTasks = tasks.filter((item) => item.is_completed);
+
+  // Calculate progress percentage
+  const progressPercentage = tasks.length
+    ? (completedTasks.length / tasks.length) * 100
+    : 0;
+
+  // rounding progress percentage without 2 decimal places;
+  goal.progress = parseFloat(progressPercentage.toFixed(2));
+}
