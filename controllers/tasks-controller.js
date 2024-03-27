@@ -1,4 +1,5 @@
 const knex = require("knex")(require("../knexfile"));
+const { validateTaskFields } = require("../validators/tasks-validators");
 
 // fields to select for tasks
 const taskAttr = [
@@ -13,9 +14,7 @@ const taskAttr = [
 // get list of tasks
 const list = async (_req, res) => {
   try {
-    const data = await knex("tasks")
-      .join("goals", "goals.id", "tasks.goal_id")
-      .select(taskAttr);
+    const data = await knex("tasks").join("goals", "goals.id", "tasks.goal_id").select(taskAttr);
     res.status(200).json(data);
   } catch (err) {
     res.status(400).send(`Error retrieving tasks: ${err}`);
@@ -49,49 +48,11 @@ const findOne = async (req, res) => {
 const add = async (req, res) => {
   try {
     const requiredFields = ["goal_id", "description", "due_date"];
+    const validation = await validateTaskFields(req, requiredFields);
 
-    // check if field is empty if not insert into the table
-    for (const field of requiredFields) {
-      if (!req.body[field]) {
-        return res.status(400).json({
-          message: `invalid input: ${field} was null or empty`,
-        });
-      }
-    }
-
-    // check if goal exists
-    const goal = await knex("goals").where({ id: req.body["goal_id"] }).first();
-    if (!goal) {
-      return res.status(400).json({
-        message: `goal ${req.body["goal_id"]} does not exist`,
-      });
-    }
-
-    // Check if task with the same description already exists
-    const existingTask = await knex("tasks")
-      .where({ goal_id: req.body.goal_id, description: req.body.description })
-      .first();
-    if (existingTask) {
-      return res.status(409).json({
-        message: "Task with the same description for this goal already exists",
-      });
-    }
-
-    // Check if the task's due date is after the goal's end date or before the start date
-
-    // TODO: Convert goal start date to a string without timezone information
-    // const goalStartDate = goal.start_date.toISOString().split("T")[0];
-    // const goalEndDate = goal.end_date.toISOString().split("T")[0];
-
-    const dueDate = new Date(req.body.due_date);
-    const goalStartDate = goal.start_date;
-    const goalEndDate = goal.end_date;
-    const formattedGoalStartDate = goalStartDate.toISOString().split("T")[0];
-    const formattedGoalEndDate = goalEndDate.toISOString().split("T")[0];
-
-    if (dueDate > goalEndDate || dueDate < goalStartDate) {
-      return res.status(400).json({
-        message: `Task due date must be between the goal's start date ${formattedGoalStartDate} and end date ${formattedGoalEndDate}`,
+    if (validation) {
+      return res.status(validation.status).json({
+        message: validation.message,
       });
     }
 
@@ -114,38 +75,21 @@ const add = async (req, res) => {
 // delete an task
 const remove = async (req, res) => {
   try {
-    const deletedRow = await knex("tasks")
-      .where({ id: req.params.id })
-      .delete();
+    const deletedRow = await knex("tasks").where({ id: req.params.id }).delete();
     if (deletedRow === 0) {
       // Checking if the task with the specified ID exists
-      return res
-        .status(404)
-        .json({ message: `Task with ID ${req.params.id} not found` });
+      return res.status(404).json({ message: `Task with ID ${req.params.id} not found` });
     }
     // No Content response
     res.sendStatus(204);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: `Unable to delete task with ID ${req.params.id}` });
+    res.status(500).json({ message: `Unable to delete task with ID ${req.params.id}` });
   }
 };
 
 // update an task with new input data
 const update = async (req, res) => {
   try {
-    const requiredFields = ["description", "is_completed", "due_date"];
-
-    // Validate required fields
-    for (const field of requiredFields) {
-      if (req.body[field] === null) {
-        return res.status(400).json({
-          message: `Invalid input: ${field} was null or empty ${req.body.is_completed} `,
-        });
-      }
-    }
-
     // Retrieve the task and its associated goal
     const task = await knex("tasks").where({ id: req.params.id }).first();
     if (!task) {
@@ -154,35 +98,16 @@ const update = async (req, res) => {
       });
     }
 
-    const goal = await knex("goals").where({ id: task.goal_id }).first();
-    if (!goal) {
-      return res.status(404).json({
-        message: `Goal associated with the task not found`,
+    const requiredFields = ["description", "is_completed", "due_date"];
+    const validation = await validateTaskFields(req, requiredFields, task.goal_id);
+
+    if (validation) {
+      return res.status(validation.status).json({
+        message: validation.message,
       });
     }
-
-    // Validate due date against goal's start and end dates
-    const dueDate = new Date(req.body.due_date);
-    const { start_date: goalStartDate, end_date: goalEndDate } = goal;
-
-    if (dueDate > goalEndDate || dueDate < goalStartDate) {
-      return res.status(400).json({
-        message: `Task due date must be between the goal's start date ${goalStartDate} and end date ${goalEndDate}`,
-      });
-    }
-
     // Update the task in the database
-    const rowsUpdated = await knex("tasks")
-      .where({ id: req.params.id })
-      .update(req.body);
-    // .update(updateData);
-
-    // Check if the task was updated successfully
-    if (rowsUpdated === 0) {
-      return res.status(404).json({
-        message: `Task with ID ${req.params.id} not found`,
-      });
-    }
+    await knex("tasks").where({ id: req.params.id }).update(req.body);
 
     // Retrieve the updated task from the database
     const updatedTask = await knex("tasks")
@@ -213,9 +138,7 @@ const procrastinations = async (req, res) => {
 
     // If task doesn't exist, return 404 response
     if (!task) {
-      return res
-        .status(404)
-        .json({ message: `task with ID: ${req.params.id} not found` });
+      return res.status(404).json({ message: `task with ID: ${req.params.id} not found` });
     }
 
     // If task exists, proceed to fetch procrastinations

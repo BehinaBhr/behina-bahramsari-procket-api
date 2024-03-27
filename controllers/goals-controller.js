@@ -1,4 +1,5 @@
 const knex = require("knex")(require("../knexfile"));
+const { validateGoalFields } = require("../validators/goals-validators");
 
 // fields to select for goals
 const goalAttr = ["id", "description", "start_date", "end_date"];
@@ -25,9 +26,7 @@ const findOne = async (req, res) => {
     const goal = await fetchGoal(req.params.id);
 
     if (!goal) {
-      return res
-        .status(404)
-        .json({ error: `Goal with ID ${req.params.id} not found` });
+      return res.status(404).json({ error: `Goal with ID ${req.params.id} not found` });
     }
 
     res.status(200).json(goal);
@@ -39,33 +38,16 @@ const findOne = async (req, res) => {
 // add a new goal
 const add = async (req, res) => {
   try {
-    const requiredFields = ["description", "start_date", "end_date"];
-
-    // if goal fields are empty return error
-    for (const field of requiredFields) {
-      if (!req.body[field]) {
-        return res.status(400).json({
-          message: `invalid input: ${field} was null or empty`,
-        });
-      }
-    }
-
-    // Check if goal with the same description already exists
-    const existingGoal = await knex("goals")
-      .where({ description: req.body.description })
-      .first();
-    if (existingGoal) {
-      return res.status(409).json({
-        message: "Goal with the same description already exists",
-      });
+    const validation = await validateGoalFields(req, res);
+    if(validation) {
+      return res.status(validation.status).json({
+        message: validation.message,
+      });  
     }
 
     const result = await knex("goals").insert(req.body);
     const newGoalId = result[0];
-    const createdGoal = await knex("goals")
-      .where({ id: newGoalId })
-      .select(goalAttr)
-      .first();
+    const createdGoal = await knex("goals").where({ id: newGoalId }).select(goalAttr).first();
 
     res.status(201).json(createdGoal);
   } catch (error) {
@@ -78,14 +60,10 @@ const add = async (req, res) => {
 // delete goal
 const remove = async (req, res) => {
   try {
-    const rowsDeleted = await knex("goals")
-      .where({ id: req.params.id })
-      .delete();
+    const rowsDeleted = await knex("goals").where({ id: req.params.id }).delete();
 
     if (rowsDeleted === 0) {
-      return res
-        .status(404)
-        .json({ message: `Goals with ID ${req.params.id} not found` });
+      return res.status(404).json({ message: `Goals with ID ${req.params.id} not found` });
     }
 
     // No Content response
@@ -100,20 +78,13 @@ const remove = async (req, res) => {
 // update a goal with new input data
 const update = async (req, res) => {
   try {
-    const requiredFields = ["description", "start_date", "end_date"];
-
-    // confirm fields are not empty
-    for (const field of requiredFields) {
-      if (!req.body[field]) {
-        return res.status(400).json({
-          message: `invalid input: ${field} was null or empty`,
-        });
-      }
+    const validation = await validateGoalFields(req, res);
+    if(validation) {
+      return res.status(validation.status).json({
+        message: validation.message,
+      });  
     }
-
-    const rowsUpdated = await knex("goals")
-      .where({ id: req.params.id })
-      .update(req.body);
+    const rowsUpdated = await knex("goals").where({ id: req.params.id }).update(req.body);
 
     if (rowsUpdated === 0) {
       return res.status(404).json({
@@ -123,7 +94,7 @@ const update = async (req, res) => {
 
     const updatedGoal = await fetchGoal(req.params.id);
 
-    res.json(updatedGoal);
+    res.status(200).json(updatedGoal);
   } catch (error) {
     res.status(500).json({
       message: `Unable to update goal with ID ${req.params.id}: ${error}`,
@@ -139,9 +110,7 @@ const tasks = async (req, res) => {
 
     // If goal doesn't exist, return 404 response
     if (!goal) {
-      return res
-        .status(404)
-        .json({ message: `goal with ID: ${req.params.id} not found` });
+      return res.status(404).json({ message: `goal with ID: ${req.params.id} not found` });
     }
 
     // If goal exists, proceed to fetch tasks
@@ -186,9 +155,7 @@ async function calculateProgress(goal) {
   const completedTasks = tasks.filter((item) => item.is_completed);
 
   // Calculate progress percentage
-  const progressPercentage = tasks.length
-    ? (completedTasks.length / tasks.length) * 100
-    : 0;
+  const progressPercentage = tasks.length ? (completedTasks.length / tasks.length) * 100 : 0;
 
   // rounding progress percentage without 2 decimal places;
   goal.progress = parseFloat(progressPercentage.toFixed(2));
