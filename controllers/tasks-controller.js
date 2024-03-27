@@ -1,5 +1,5 @@
 const knex = require("knex")(require("../knexfile"));
-const { validateTaskFields, validateDueDate } = require("../validators/tasks-validators");
+const { validateTaskFields } = require("../validators/tasks-validators");
 
 // fields to select for tasks
 const taskAttr = [
@@ -48,8 +48,13 @@ const findOne = async (req, res) => {
 const add = async (req, res) => {
   try {
     const requiredFields = ["goal_id", "description", "due_date"];
-    await validateTaskFields(req, res, requiredFields);
-    await validateDueDate(req, res);
+    const validation = await validateTaskFields(req, requiredFields);
+
+    if (validation) {
+      return res.status(validation.status).json({
+        message: validation.message,
+      });
+    }
 
     const result = await knex("tasks").insert(req.body);
     const newtaskId = result[0];
@@ -94,9 +99,13 @@ const update = async (req, res) => {
     }
 
     const requiredFields = ["description", "is_completed", "due_date"];
-    await validateTaskFields(req, res, requiredFields, task.goal_id);
-    await validateDueDate(req, res, task.goal_id);
+    const validation = await validateTaskFields(req, requiredFields, task.goal_id);
 
+    if (validation) {
+      return res.status(validation.status).json({
+        message: validation.message,
+      });
+    }
     // Update the task in the database
     await knex("tasks").where({ id: req.params.id }).update(req.body);
 

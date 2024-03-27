@@ -38,7 +38,12 @@ const findOne = async (req, res) => {
 // add a new goal
 const add = async (req, res) => {
   try {
-    await validateGoalFields(req, res);
+    const validation = await validateGoalFields(req, res);
+    if(validation) {
+      return res.status(validation.status).json({
+        message: validation.message,
+      });  
+    }
 
     const result = await knex("goals").insert(req.body);
     const newGoalId = result[0];
@@ -73,8 +78,12 @@ const remove = async (req, res) => {
 // update a goal with new input data
 const update = async (req, res) => {
   try {
-    await validateGoalFields(req, res);
-
+    const validation = await validateGoalFields(req, res);
+    if(validation) {
+      return res.status(validation.status).json({
+        message: validation.message,
+      });  
+    }
     const rowsUpdated = await knex("goals").where({ id: req.params.id }).update(req.body);
 
     if (rowsUpdated === 0) {
