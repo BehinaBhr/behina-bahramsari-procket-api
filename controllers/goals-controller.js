@@ -40,7 +40,7 @@ const findOne = async (req, res) => {
 // add a new goal
 const add = async (req, res) => {
   try {
-    const validation = await validateGoalFields(req, res);
+    const validation = await validateGoalFields(req);
     if (validation) {
       return res.status(validation.status).json({
         message: validation.message,
@@ -80,7 +80,7 @@ const remove = async (req, res) => {
 // update a goal with new input data
 const update = async (req, res) => {
   try {
-    const validation = await validateGoalFields(req, res);
+    const validation = await validateGoalFields(req, true);
     if (validation) {
       return res.status(validation.status).json({
         message: validation.message,
