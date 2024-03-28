@@ -1,5 +1,6 @@
 const knex = require("knex")(require("../knexfile"));
 const { validateTaskFields } = require("../validators/tasks-validators");
+const { categorizedReasons } = require("../utils/utils");
 
 // fields to select for tasks
 const taskAttr = [
@@ -126,15 +127,9 @@ const update = async (req, res) => {
   }
 };
 
-// procrastinations for a given goal
 const procrastinations = async (req, res) => {
   try {
-    // Check if the task ID exists
-    const task = await knex("tasks")
-      .join("goals", "goals.id", "tasks.goal_id")
-      .select(taskAttr)
-      .where({ "tasks.id": req.params.id })
-      .first();
+    const task = await knex("tasks").where({ "tasks.id": req.params.id }).first();
 
     // If task doesn't exist, return 404 response
     if (!task) {
@@ -154,6 +149,32 @@ const procrastinations = async (req, res) => {
   }
 };
 
+// procrastinations for a given goal
+const procrastinations_grouped = async (req, res) => {
+  try {
+    // Check if the task ID exists
+    const task = await knex("tasks").where({ "tasks.id": req.params.id }).first();
+
+    // If task doesn't exist, return 404 response
+    if (!task) {
+      return res.status(404).json({ message: `task with ID: ${req.params.id} not found` });
+    }
+
+    // If task exists, proceed to fetch procrastinations
+    const procrastinations = await knex("procrastinations").where({
+      task_id: req.params.id,
+    });
+
+    const reasonCounts = categorizedReasons(procrastinations);
+
+    res.json(reasonCounts);
+  } catch (error) {
+    res.status(500).json({
+      message: `Unable to retrieve procrastinations for task with ID ${req.params.id}: ${error}`,
+    });
+  }
+};
+
 module.exports = {
   list,
   findOne,
@@ -161,4 +182,5 @@ module.exports = {
   remove,
   update,
   procrastinations,
+  procrastinations_grouped,
 };

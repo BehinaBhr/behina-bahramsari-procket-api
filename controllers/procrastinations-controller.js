@@ -1,5 +1,5 @@
 const knex = require("knex")(require("../knexfile"));
-
+const { categorizedReasons } = require("../utils/utils");
 // fields to select for tasks
 const procrastinationAttr = [
   "procrastinations.id",
@@ -8,11 +8,11 @@ const procrastinationAttr = [
   "procrastinations.created_at",
 ];
 
-// get list of procrastinations
-const list = async (_req, res) => {
+const grouped_list = async (_req, res) => {
   try {
     const data = await knex("procrastinations").select(procrastinationAttr);
-    res.status(200).json(data);
+    const reasonCounts = categorizedReasons(data);
+    res.status(200).json(reasonCounts);
   } catch (err) {
     res.status(400).send(`Error retrieving procrastinations: ${err}`);
   }
@@ -57,26 +57,20 @@ const add = async (req, res) => {
 
 // delete a procrastination
 const remove = async (req, res) => {
-    try {
-      const deletedRow = await knex("procrastinations")
-        .where({ id: req.params.id })
-        .delete();
-      if (deletedRow === 0) {
-        // Checking if the procrastination with the specified ID exists
-        return res
-          .status(404)
-          .json({ message: `Procrastination with ID ${req.params.id} not found` });
-      }
-      // No Content response
-      res.sendStatus(204);
-    } catch (error) {
-      res
-        .status(500)
-        .json({ message: `Unable to delete procrastination with ID ${req.params.id}` });
+  try {
+    const deletedRow = await knex("procrastinations").where({ id: req.params.id }).delete();
+    if (deletedRow === 0) {
+      // Checking if the procrastination with the specified ID exists
+      return res.status(404).json({ message: `Procrastination with ID ${req.params.id} not found` });
     }
-  };
+    // No Content response
+    res.sendStatus(204);
+  } catch (error) {
+    res.status(500).json({ message: `Unable to delete procrastination with ID ${req.params.id}` });
+  }
+};
 module.exports = {
-  list,
+  grouped_list,
   add,
   remove,
 };

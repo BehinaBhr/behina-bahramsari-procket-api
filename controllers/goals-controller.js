@@ -1,5 +1,6 @@
 const knex = require("knex")(require("../knexfile"));
 const { validateGoalFields } = require("../validators/goals-validators");
+const { categorizedReasons } = require("../utils/utils");
 
 // fields to select for goals
 const goalAttr = ["id", "description", "start_date", "end_date"];
@@ -12,6 +13,7 @@ const list = async (_req, res) => {
     // Calculate progress percentage for each goal
     for (const goal of data) {
       await calculateProgress(goal);
+      await addTotalProcastinationsToGoal(goal);
     }
 
     res.status(200).json(data);
@@ -39,15 +41,15 @@ const findOne = async (req, res) => {
 const add = async (req, res) => {
   try {
     const validation = await validateGoalFields(req, res);
-    if(validation) {
+    if (validation) {
       return res.status(validation.status).json({
         message: validation.message,
-      });  
+      });
     }
 
     const result = await knex("goals").insert(req.body);
     const newGoalId = result[0];
-    const createdGoal = await knex("goals").where({ id: newGoalId }).select(goalAttr).first();
+    const createdGoal = await fetchGoal(newGoalId);
 
     res.status(201).json(createdGoal);
   } catch (error) {
@@ -79,10 +81,10 @@ const remove = async (req, res) => {
 const update = async (req, res) => {
   try {
     const validation = await validateGoalFields(req, res);
-    if(validation) {
+    if (validation) {
       return res.status(validation.status).json({
         message: validation.message,
-      });  
+      });
     }
     const rowsUpdated = await knex("goals").where({ id: req.params.id }).update(req.body);
 
@@ -126,10 +128,34 @@ const tasks = async (req, res) => {
         "tasks.due_date"
       );
 
+    for (const task of tasks) {
+      await addTotalProcastinationsToTask(task);
+    }
+
     res.json(tasks);
   } catch (error) {
     res.status(500).json({
       message: `Unable to retrieve tasks for goal with ID ${req.params.id}: ${error}`,
+    });
+  }
+};
+
+const procrastinations = async (req, res) => {
+  const goal = await fetchGoal(req.params.id);
+
+  if (!goal) {
+    return res.status(404).json({ error: `Goal with ID ${req.params.id} not found` });
+  }
+
+  try {
+    // Fetch all tasks associated with the goal
+    const procrastinations = await knex("procrastinations")
+      .join("tasks", "procrastinations.task_id", "tasks.id")
+      .where({ "tasks.goal_id": req.params.id });
+    res.json(categorizedReasons(procrastinations));
+  } catch (error) {
+    res.status(500).json({
+      message: `Unable to retrieve procrastinations for goal with ID ${req.params.goal_id}: ${error}`,
     });
   }
 };
@@ -141,7 +167,9 @@ module.exports = {
   remove,
   update,
   tasks,
+  procrastinations,
 };
+
 async function fetchGoal(id) {
   const goal = await knex("goals").where({ id: id }).select(goalAttr).first();
   if (goal) {
@@ -159,4 +187,18 @@ async function calculateProgress(goal) {
 
   // rounding progress percentage without 2 decimal places;
   goal.progress = parseFloat(progressPercentage.toFixed(2));
+}
+
+async function addTotalProcastinationsToGoal(goal) {
+  const procrastinations = await knex("procrastinations")
+    .join("tasks", "procrastinations.task_id", "tasks.id")
+    .where({ "tasks.goal_id": goal.id });
+  // rounding progress percentage without 2 decimal places;
+  goal.procastinations = parseFloat(procrastinations.length.toFixed(2));
+}
+
+async function addTotalProcastinationsToTask(task) {
+  const procrastinations = await knex("procrastinations").where({ task_id: task.id });
+  // rounding progress percentage without 2 decimal places;
+  task.procastinations = parseFloat(procrastinations.length.toFixed(2));
 }
