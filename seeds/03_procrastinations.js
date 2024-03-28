@@ -9,7 +9,7 @@ exports.seed = async function (knex) {
     {
       id: 1,
       task_id: 1,
-      reason: "no need to rush I still have time for it",
+      reason: "No rush, plenty of time",
     },
     {
       id: 2,
@@ -19,7 +19,7 @@ exports.seed = async function (knex) {
     {
       id: 3,
       task_id: 1,
-      reason: "Not feeling in the mood to do it",
+      reason: "Not being in the mood",
     },
     {
       id: 4,
@@ -29,7 +29,7 @@ exports.seed = async function (knex) {
     {
       id: 5,
       task_id: 3,
-      reason: "Not feeling in the mood to do it",
+      reason: "Not being in the mood",
     },
     {
       id: 6,
@@ -40,19 +40,19 @@ exports.seed = async function (knex) {
       id: 7,
       task_id: 5,
       reason:
-        "nothing bad will happen, no punishment, and no one will find out",
+        "Nothing bad will happen",
     },
     {
       id: 8,
       task_id: 6,
       reason:
-        "waste time overthinking about what needs to be done and how to do the task instead of starting working on it and engaging in it step by step",
+        "Overthinking the task",
     },
     {
       id: 9,
       task_id: 7,
       reason:
-        "Delaying one task in favor of working on another is a sign of the habit of perfectionism stuck on one step to make it perfect instead of keeping going and improving the whole perspective little by little",
+        "Delaying one task to perfect another",
     },
     {
       id: 10,
@@ -62,17 +62,17 @@ exports.seed = async function (knex) {
     {
       id: 11,
       task_id: 7,
-      reason: "sickness or poor health",
+      reason: "Sickness or poor health",
     },
     {
       id: 12,
       task_id: 7,
-      reason: "sickness or poor health",
+      reason: "Sickness or poor health",
     },
     {
       id: 13,
       task_id: 7,
-      reason: "sickness or poor health",
+      reason: "Sickness or poor health",
     },
     {
       id: 14,
@@ -83,17 +83,17 @@ exports.seed = async function (knex) {
       id: 15,
       task_id: 9,
       reason:
-        "nothing bad will happen no punishment and no one find it out = Lacking the initiative to get started",
+        "Nothing bad will happen",
     },
     {
       id: 16,
       task_id: 10,
-      reason: "not feeling in the mood to do it",
+      reason: "Not being in the mood",
     },
     {
       id: 17,
       task_id: 11,
-      reason: "sickness or poor health",
+      reason: "Sickness or poor health",
     },
   ]);
 };
