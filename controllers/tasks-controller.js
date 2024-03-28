@@ -127,6 +127,7 @@ const update = async (req, res) => {
   }
 };
 
+// procrastinations for a given goal
 const procrastinations = async (req, res) => {
   try {
     const task = await knex("tasks").where({ "tasks.id": req.params.id }).first();
