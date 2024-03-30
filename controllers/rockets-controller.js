@@ -12,7 +12,7 @@ const list = async (req, res) => {
     const rocketsCount = data.length;
     let rockets = [];
     for (let i = 1; i <= rocketsCount; i++) {
-      const imagePath = `images/rocket-${i}.jpg`;
+      const imagePath = `images/rocket-${i}.png`;
       rockets.push(imagePath);
     }
     res.status(200).json(rockets);
