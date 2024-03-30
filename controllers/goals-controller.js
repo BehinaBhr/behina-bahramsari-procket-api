@@ -5,14 +5,11 @@ const { categorizedReasons } = require("../utils/utils");
 // fields to select for goals
 const goalAttr = ["id", "description", "start_date", "end_date"];
 
-const fetchList = async (res, ordering) => {
+// get list of goals
+const list = async (_req, res) => {
   try {
-    let data;
-    if (ordering) {
-      data = await knex("goals").where("end_date", ordering, knex.fn.now()).select(goalAttr);
-    } else {
-      data = await knex("goals").select(goalAttr);
-    }
+    const data = await knex("goals").select(goalAttr);
+
     // Calculate progress percentage for each goal
     for (const goal of data) {
       await calculateProgress(goal);
@@ -28,18 +25,6 @@ const fetchList = async (res, ordering) => {
   } catch (err) {
     res.status(400).send(`Error retrieving goals: ${err}`);
   }
-};
-// get list of goals
-const list = async (_req, res) => {
-  await fetchList(res);
-};
-
-const past = async (_req, res) => {
-  await fetchList(res, "<");
-};
-
-const onGoing = async (_req, res) => {
-  await fetchList(res, ">");
 };
 
 // get a single goal
@@ -139,8 +124,8 @@ const tasks = async (req, res) => {
     const tasks = await knex("goals")
       .join("tasks", "tasks.goal_id", "goals.id")
       .where({ goal_id: req.params.id })
-      .orderBy('tasks.is_completed', 'asc')
-      .orderBy('tasks.due_date')
+      .orderBy("tasks.is_completed", "asc")
+      .orderBy("tasks.due_date")
       .select(
         "tasks.id",
         "tasks.goal_id",
@@ -184,8 +169,6 @@ const procrastinations = async (req, res) => {
 
 module.exports = {
   list,
-  past,
-  onGoing,
   findOne,
   add,
   remove,
