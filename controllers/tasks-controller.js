@@ -15,7 +15,10 @@ const taskAttr = [
 // get list of tasks
 const list = async (_req, res) => {
   try {
-    const data = await knex("tasks").join("goals", "goals.id", "tasks.goal_id").select(taskAttr);
+    const data = await knex("tasks").join("goals", "goals.id", "tasks.goal_id")
+    .orderBy('is_completed', 'asc')
+    .orderBy('due_date')
+    .select(taskAttr);
     res.status(200).json(data);
   } catch (err) {
     res.status(400).send(`Error retrieving tasks: ${err}`);
