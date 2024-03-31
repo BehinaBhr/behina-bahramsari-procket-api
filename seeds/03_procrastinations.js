@@ -39,20 +39,17 @@ exports.seed = async function (knex) {
     {
       id: 7,
       task_id: 5,
-      reason:
-        "Nothing bad will happen",
+      reason: "Nothing bad will happen",
     },
     {
       id: 8,
       task_id: 6,
-      reason:
-        "Overthinking the task",
+      reason: "Overthinking the task",
     },
     {
       id: 9,
       task_id: 7,
-      reason:
-        "Delaying one task to perfect another",
+      reason: "Delaying one task to perfect another",
     },
     {
       id: 10,
@@ -66,33 +63,67 @@ exports.seed = async function (knex) {
     },
     {
       id: 12,
-      task_id: 7,
-      reason: "Sickness or poor health",
-    },
-    {
-      id: 13,
-      task_id: 7,
-      reason: "Sickness or poor health",
-    },
-    {
-      id: 14,
       task_id: 8,
       reason: "Forgetting",
     },
     {
-      id: 15,
+      id: 13,
       task_id: 9,
-      reason:
-        "Nothing bad will happen",
+      reason: "Nothing bad will happen",
     },
     {
-      id: 16,
+      id: 14,
       task_id: 10,
       reason: "Not being in the mood",
     },
     {
-      id: 17,
+      id: 15,
       task_id: 11,
+      reason: "Sickness or poor health",
+    },
+    {
+      id: 16,
+      task_id: 13,
+      reason: "Not being in the mood",
+    },
+    {
+      id: 17,
+      task_id: 13,
+      reason: "No rush, plenty of time",
+    },
+    {
+      id: 18,
+      task_id: 14,
+      reason: "Forgetting",
+    },
+    {
+      id: 19,
+      task_id: 14,
+      reason: "Not being in the mood",
+    },
+    {
+      id: 20,
+      task_id: 15,
+      reason: "Nothing bad will happen",
+    },
+    {
+      id: 21,
+      task_id: 15,
+      reason: "Overthinking the task",
+    },
+    {
+      id: 22,
+      task_id: 16,
+      reason: "Delaying one task to perfect another",
+    },
+    {
+      id: 23,
+      task_id: 16,
+      reason: "Forgetting",
+    },
+    {
+      id: 24,
+      task_id: 17,
       reason: "Sickness or poor health",
     },
   ]);
