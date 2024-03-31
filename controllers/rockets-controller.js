@@ -7,6 +7,7 @@ const list = async (req, res) => {
       .from("goals")
       .leftJoin("tasks", "goals.id", "tasks.goal_id")
       .groupBy("goals.id")
+      .havingRaw("COUNT(tasks.id) > 0")
       .havingRaw("COUNT(tasks.id) = SUM(CASE WHEN tasks.is_completed = true THEN 1 ELSE 0 END)");
 
     const rocketsCount = data.length;
