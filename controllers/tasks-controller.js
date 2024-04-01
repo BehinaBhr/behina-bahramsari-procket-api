@@ -30,7 +30,8 @@ const past = async (_req, res) => {
   try {
     const data = await knex("tasks")
       .join("goals", "goals.id", "tasks.goal_id")
-      .where("due_date", "<", knex.fn.now())
+      .whereRaw("due_date < CURDATE()")
+      .andWhere("is_completed", false)
       .orderBy("is_completed", "asc")
       .orderBy("due_date")
       .select(taskAttr);
@@ -44,7 +45,8 @@ const onGoing = async (_req, res) => {
   try {
     const data = await knex("tasks")
       .join("goals", "goals.id", "tasks.goal_id")
-      .where("due_date", ">=", knex.fn.now())
+      .whereRaw("due_date >= CURDATE()")
+      .andWhere("is_completed", false)
       .orderBy("is_completed", "asc")
       .orderBy("due_date")
       .select(taskAttr);
