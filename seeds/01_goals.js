@@ -1,4 +1,4 @@
- const { daysLater } = require("../utils/utils");
+ const { shiftDays } = require("../utils/utils");
 
 /**
  * @param { import("knex").Knex } knex
@@ -11,14 +11,14 @@ exports.seed = async function (knex) {
     {
       id: 1,
       description: "Finish Procket project",
-      start_date: daysLater(-10), // Format as 'YYYY-MM-DD'
-      end_date: daysLater(30), // 30 days later
+      start_date: shiftDays(-10),
+      end_date: shiftDays(30),
     },
     {
       id: 2,
       description: "Read 5 books",
-      start_date: daysLater(0),
-      end_date: daysLater(45),
+      start_date: shiftDays(0),
+      end_date: shiftDays(45),
     },
     {
       id: 3,

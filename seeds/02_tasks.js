@@ -1,4 +1,4 @@
-const { daysLater } = require("../utils/utils");
+const { shiftDays } = require("../utils/utils");
 
 /**
  * @param { import("knex").Knex } knex
@@ -13,28 +13,28 @@ exports.seed = async function (knex) {
       goal_id: 1,
       description: "Complete frontend development",
       is_completed: 1,
-      due_date: daysLater(1),
+      due_date: shiftDays(1),
     },
     {
       id: 2,
       goal_id: 1,
       description: "Implement backend APIs",
       is_completed: 1,
-      due_date: daysLater(3),
+      due_date: shiftDays(3),
     },
     {
       id: 3,
       goal_id: 2,
       description: "Read 'Sapiens' by Yuval Noah Harari",
       is_completed: 0,
-      due_date: daysLater(3),
+      due_date: shiftDays(3),
     },
     {
       id: 4,
       goal_id: 2,
       description: "Read 'Atomic Habits' by James Clear",
       is_completed: 1,
-      due_date: daysLater(5),
+      due_date: shiftDays(5),
     },
     {
       id: 5,
@@ -55,28 +55,28 @@ exports.seed = async function (knex) {
       goal_id: 1,
       description: "Implement authentication feature",
       is_completed: 0,
-      due_date: daysLater(20),
+      due_date: shiftDays(20),
     },
     {
       id: 8,
       goal_id: 2,
       description: "Read 'The Great Gatsby' by F. Scott Fitzgerald",
       is_completed: 0,
-      due_date: daysLater(10),
+      due_date: shiftDays(10),
     },
     {
       id: 9,
       goal_id: 2,
       description: "Read 'Thinking, Fast and Slow' by Daniel Kahneman",
       is_completed: 0,
-      due_date: daysLater(0),
+      due_date: shiftDays(0),
     },
     {
       id: 10,
       goal_id: 2,
       description: "Read 'The Power of Habit' by Charles Duhigg",
       is_completed: 1,
-      due_date: daysLater(15),
+      due_date: shiftDays(15),
     },
     {
       id: 11,

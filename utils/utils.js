@@ -13,10 +13,10 @@ const categorizedReasons = (data) => {
 };
 
 
-const daysLater = (days) => {
+const shiftDays = (days) => {
   const result = new Date();
   result.setDate(result.getDate() + days);
   return result.toISOString().slice(0, 10);
 };
 
-module.exports = { categorizedReasons, daysLater };
+module.exports = { categorizedReasons, shiftDays };
