@@ -2,10 +2,10 @@ const knex = require("knex")(require("../knexfile"));
 const { validateGoalFields } = require("../validators/goals-validators");
 const { categorizedReasons } = require("../utils/utils");
 
-// fields to select for goals
+// Fields to select for goals
 const goalAttr = ["id", "description", "start_date", "end_date"];
 
-// get list of goals
+// Retrieve list of goals
 const list = async (_req, res) => {
   try {
     const data = await knex("goals").select(goalAttr);
@@ -15,11 +15,12 @@ const list = async (_req, res) => {
       await calculateProgress(goal);
       await addTotalProcastinationsToGoal(goal);
     }
+    // Sort goals by progress descending, and if progress is the same, sort by start date ascending
     data.sort((a, b) => {
       if (a.progress !== b.progress) {
-        return a.progress - b.progress; // Sort by progress descending
+        return a.progress - b.progress;
       }
-      return new Date(a.end_date) - new Date(b.end_date); // If progress is the same, sort by start_date ascending
+      return new Date(a.end_date) - new Date(b.end_date);
     });
     res.status(200).json(data);
   } catch (err) {
@@ -27,7 +28,7 @@ const list = async (_req, res) => {
   }
 };
 
-// get a single goal
+// Retrieve a single goal
 const findOne = async (req, res) => {
   try {
     const goal = await fetchGoal(req.params.id);
@@ -42,7 +43,7 @@ const findOne = async (req, res) => {
   }
 };
 
-// add a new goal
+// Add a new goal
 const add = async (req, res) => {
   try {
     const validation = await validateGoalFields(req);
@@ -64,16 +65,16 @@ const add = async (req, res) => {
   }
 };
 
-// delete goal
+// Delete a goal
 const remove = async (req, res) => {
   try {
     const rowsDeleted = await knex("goals").where({ id: req.params.id }).delete();
 
     if (rowsDeleted === 0) {
-      return res.status(404).json({ message: `Goals with ID ${req.params.id} not found` });
+      return res.status(404).json({ message: `Goal with ID ${req.params.id} not found` });
     }
 
-    // No Content response
+    // Send No Content response
     res.sendStatus(204);
   } catch (error) {
     res.status(500).json({
@@ -82,7 +83,7 @@ const remove = async (req, res) => {
   }
 };
 
-// update a goal with new input data
+// Update a goal with new input data
 const update = async (req, res) => {
   try {
     const validation = await validateGoalFields(req, true);
@@ -109,18 +110,16 @@ const update = async (req, res) => {
   }
 };
 
-// tasks for a given goal
+// Retrieve tasks for a given goal
 const tasks = async (req, res) => {
   try {
     // Check if the goal ID exists
     const goal = await fetchGoal(req.params.id);
-
-    // If goal doesn't exist, return 404 response
     if (!goal) {
-      return res.status(404).json({ message: `goal with ID: ${req.params.id} not found` });
+      return res.status(404).json({ message: `Goal with ID: ${req.params.id} not found` });
     }
 
-    // If goal exists, proceed to fetch tasks
+    // Fetch tasks associated with the goal and sort them
     const tasks = await knex("goals")
       .join("tasks", "tasks.goal_id", "goals.id")
       .where({ goal_id: req.params.id })
@@ -135,6 +134,7 @@ const tasks = async (req, res) => {
         "tasks.due_date"
       );
 
+    // Add total procrastinations to each task
     for (const task of tasks) {
       await addTotalProcastinationsToTask(task);
     }
@@ -147,18 +147,21 @@ const tasks = async (req, res) => {
   }
 };
 
+// Retrieve procrastinations for a given goal
 const procrastinations = async (req, res) => {
-  const goal = await fetchGoal(req.params.id);
+  const goal = await fetchGoal(req.params.id); // Fetch goal by ID
 
   if (!goal) {
     return res.status(404).json({ error: `Goal with ID ${req.params.id} not found` });
   }
 
   try {
-    // Fetch all tasks associated with the goal
+    // Fetch all procrastinations associated with the goal
     const procrastinations = await knex("procrastinations")
       .join("tasks", "procrastinations.task_id", "tasks.id")
       .where({ "tasks.goal_id": req.params.id });
+
+    // Categorize and send procrastinations
     res.json(categorizedReasons(procrastinations));
   } catch (error) {
     res.status(500).json({
@@ -177,6 +180,7 @@ module.exports = {
   procrastinations,
 };
 
+// Fetch goal details by ID
 async function fetchGoal(id) {
   const goal = await knex("goals").where({ id: id }).select(goalAttr).first();
   if (goal) {
@@ -185,6 +189,7 @@ async function fetchGoal(id) {
   return goal;
 }
 
+// Calculate progress for a goal
 async function calculateProgress(goal) {
   const tasks = await knex("tasks").where({ goal_id: goal.id });
   const completedTasks = tasks.filter((item) => item.is_completed);
@@ -192,20 +197,19 @@ async function calculateProgress(goal) {
   // Calculate progress percentage
   const progressPercentage = tasks.length ? (completedTasks.length / tasks.length) * 100 : 0;
 
-  // rounding progress percentage without 2 decimal places;
-  goal.progress = parseFloat(progressPercentage.toFixed(2));
+  goal.progress = parseFloat(progressPercentage.toFixed(2)); // Round progress percentage to 2 decimal places
 }
 
 async function addTotalProcastinationsToGoal(goal) {
   const procrastinations = await knex("procrastinations")
     .join("tasks", "procrastinations.task_id", "tasks.id")
     .where({ "tasks.goal_id": goal.id });
-  // rounding progress percentage without 2 decimal places;
-  goal.procastinations = parseFloat(procrastinations.length.toFixed(2));
+
+  goal.procastinations = parseFloat(procrastinations.length.toFixed(2)); // Round total procrastinations to 2 decimal places
 }
 
 async function addTotalProcastinationsToTask(task) {
   const procrastinations = await knex("procrastinations").where({ task_id: task.id });
-  // rounding progress percentage without 2 decimal places;
-  task.procastinations = parseFloat(procrastinations.length.toFixed(2));
+
+  task.procastinations = parseFloat(procrastinations.length.toFixed(2)); // Round total procrastinations to 2 decimal places
 }
