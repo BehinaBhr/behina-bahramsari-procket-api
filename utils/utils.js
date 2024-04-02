@@ -12,4 +12,11 @@ const categorizedReasons = (data) => {
   return reasonCounts;
 };
 
-module.exports = { categorizedReasons };
+
+const shiftDays = (days) => {
+  const result = new Date();
+  result.setDate(result.getDate() + days);
+  return result.toISOString().slice(0, 10);
+};
+
+module.exports = { categorizedReasons, shiftDays };
