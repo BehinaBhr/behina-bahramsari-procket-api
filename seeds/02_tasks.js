@@ -1,3 +1,5 @@
+const { daysLater } = require("../utils/utils");
+
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
@@ -11,28 +13,28 @@ exports.seed = async function (knex) {
       goal_id: 1,
       description: "Complete frontend development",
       is_completed: 1,
-      due_date: "2024-04-06",
+      due_date: daysLater(1),
     },
     {
       id: 2,
       goal_id: 1,
       description: "Implement backend APIs",
       is_completed: 1,
-      due_date: "2024-04-06",
+      due_date: daysLater(3),
     },
     {
       id: 3,
       goal_id: 2,
       description: "Read 'Sapiens' by Yuval Noah Harari",
       is_completed: 0,
-      due_date: "2024-03-31",
+      due_date: daysLater(3),
     },
     {
       id: 4,
       goal_id: 2,
       description: "Read 'Atomic Habits' by James Clear",
       is_completed: 1,
-      due_date: "2024-03-31",
+      due_date: daysLater(5),
     },
     {
       id: 5,
@@ -46,35 +48,35 @@ exports.seed = async function (knex) {
       goal_id: 5,
       description: "Research and create a list of must-visit attractions in Iran",
       is_completed: 1,
-      due_date: "2024-05-31",
+      due_date: "2023-05-31",
     },
     {
       id: 7,
       goal_id: 1,
       description: "Implement authentication feature",
       is_completed: 0,
-      due_date: "2024-04-01",
+      due_date: daysLater(20),
     },
     {
       id: 8,
       goal_id: 2,
       description: "Read 'The Great Gatsby' by F. Scott Fitzgerald",
       is_completed: 0,
-      due_date: "2024-03-25",
+      due_date: daysLater(10),
     },
     {
       id: 9,
       goal_id: 2,
       description: "Read 'Thinking, Fast and Slow' by Daniel Kahneman",
       is_completed: 0,
-      due_date: "2024-03-25",
+      due_date: daysLater(0),
     },
     {
       id: 10,
       goal_id: 2,
       description: "Read 'The Power of Habit' by Charles Duhigg",
       is_completed: 1,
-      due_date: "2024-03-27",
+      due_date: daysLater(15),
     },
     {
       id: 11,
@@ -109,42 +111,42 @@ exports.seed = async function (knex) {
       goal_id: 5,
       description: "Learn about Iranian culture and customs",
       is_completed: 1,
-      due_date: "2024-05-20",
+      due_date: "2023-05-20",
     },
     {
       id: 16,
       goal_id: 5,
       description: "Arrange accommodation in different cities of Iran",
       is_completed: 1,
-      due_date: "2024-05-25",
+      due_date: "2023-05-25",
     },
     {
       id: 17,
       goal_id: 5,
       description: "Research local cuisine and must-try dishes in Iran",
       is_completed: 1,
-      due_date: "2024-05-30",
+      due_date: "2023-05-30",
     },
     {
       id: 18,
       goal_id: 5,
       description: "Book flights to Iran",
       is_completed: 1,
-      due_date: "2024-05-25",
+      due_date: "2023-05-25",
     },
     {
       id: 19,
       goal_id: 5,
       description: "Exchange currency to Iranian rial",
       is_completed: 1,
-      due_date: "2024-05-29",
+      due_date: "2023-05-29",
     },
     {
       id: 20,
       goal_id: 5,
       description: "Learn basic Persian phrases",
       is_completed: 1,
-      due_date: "2024-05-01",
-    },
+      due_date: "2023-05-01",
+    }
   ]);
 };
