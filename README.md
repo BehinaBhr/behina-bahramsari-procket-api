@@ -44,8 +44,8 @@ is responsible for managing the goals, tasks, and procrastination data. It provi
   - **Express.js** (**Node.js**) with **knex** for database operations.
 
 - Database:
-
-  - Use a relational database **MySQL** for goals and tasks information, procrastinations logs.
+  
+   - Use **MySQL** a relational database management system for seed data, migrations, API development, and CRUD operations for managing goals, tasks, and procrastination logs
 
 ## Data Schema
 
