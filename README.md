@@ -49,7 +49,7 @@ is responsible for managing the goals, tasks, and procrastination data. It provi
 
 ## Data Schema
 
-![](./src/assets/readme-images/sql-diagram.png)
+![](./assets/readme-images/sql-diagram.png)
 
 ## Endpoints
 
